@@ -38,7 +38,8 @@
     }
   </style>
 </head>
-<body>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex">
+    <!-- Sidebar -->
   <div class="container">
     <h1>Welcome to Vehicle Rental Management System</h1>
     <a href="admin_login.php">Admin Login</a>

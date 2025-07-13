@@ -237,40 +237,21 @@ if (isset($_GET['return']) && isset($_GET['booking_id'])) {
             });
         }
 
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('sidebar-hidden');
-        }
+        // function toggleSidebar() {
+        //     const sidebar = document.getElementById('sidebar');
+        //     const mainContent = document.getElementById('main-content');
+        //     sidebar.classList.toggle('sidebar-hidden');
+        //     if (sidebar.classList.contains('sidebar-hidden')) {
+        //         mainContent.classList.remove('ml-64');
+        //     } else {
+        //         mainContent.classList.add('ml-64');
+        //     }
+        // }
     </script>
 </head>
-<body class="bg-gray-900 text-gray-100 min-h-screen flex">
-    <!-- Sidebar -->
-    <div id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-gray-800 p-4 shadow-lg z-50 md:transform-none sidebar-hidden md:sidebar">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-indigo-400">Admin Panel</h3>
-            <button class="md:hidden text-gray-300 hover:text-white" onclick="toggleSidebar()">✕</button>
-        </div>
-        <ul class="space-y-2">
-            <li>
-                <a href="#add-vehicle-form" class="block p-2 rounded-md bg-indigo-600 text-white font-semibold">Add Vehicle</a>
-            </li>
-            <li>
-                <a href="../user.php" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">User</a>
-            </li>
-            <li>
-                <a href="history.php" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">History</a>
-            </li>
-            <li>
-                <a href="revenue.php" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">Revenue</a>
-            </li>
-            <li>
-                <a href="all_users.php" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">All Users</a>
-            </li>
-        </ul>
-    </div>
-
-    <!-- Main Content -->
-    <div class="flex-1 p-6 ml-0 md:ml-64">
+<body class="bg-gray-900 text-gray-100 min-h-screen">
+    <?php include '../components/navbar.php'; ?>
+        <div id="main-content" class="flex-1 p-6 ml-0 transition-all duration-300">
         <button class="md:hidden btn-primary text-white font-semibold py-2 px-4 rounded-md mb-4" onclick="toggleSidebar()">☰ Menu</button>
         <h2 class="text-3xl font-bold text-center mb-8 text-white">Admin Dashboard - Vehicle Management</h2>
 
@@ -284,10 +265,10 @@ if (isset($_GET['return']) && isset($_GET['booking_id'])) {
                 <h4 class="text-sm font-medium text-gray-300">Today's Revenue</h4>
                 <p class="text-xl font-bold text-indigo-400">₹<?php echo number_format($today_revenue, 2); ?></p>
             </div>
-            <div class="circle-card flex-col">
+            <a href="../user.php"class="circle-card flex-col">
                 <h4 class="text-sm font-medium text-gray-300">Total Users</h4>
                 <p class="text-xl font-bold text-indigo-400"><?php echo $total_users; ?></p>
-            </div>
+</a>
         </div>
 
         <!-- Search Bar -->
