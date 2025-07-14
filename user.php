@@ -80,34 +80,40 @@ include 'db.php'; // Database connection
                 $address = mysqli_real_escape_string($conn, $_POST['address']);
                 $aadhaar_image = '';
                 $profile_photo = '';
-                if (isset($_FILES['aadhaar_image']) && $_FILES['aadhaar_image']['error'] == 0) {
-                    $upload_dir = 'admin/Uploads/';
-                    if (!is_dir($upload_dir)) {
-                        mkdir($upload_dir, 0755, true);
+                // Duplicate id_number चेक करें
+                $check = mysqli_query($conn, "SELECT user_id FROM users WHERE id_number = '$id_number'");
+                if (mysqli_num_rows($check) > 0) {
+                    echo '<div class="mt-4 p-2 bg-red-600 rounded">यह ID नंबर पहले से मौजूद है!</div>';
+                } else {
+                    if (isset($_FILES['aadhaar_image']) && $_FILES['aadhaar_image']['error'] == 0) {
+                        $upload_dir = 'admin/Uploads/';
+                        if (!is_dir($upload_dir)) {
+                            mkdir($upload_dir, 0755, true);
+                        }
+                        $aadhaar_image = $upload_dir . basename($_FILES['aadhaar_image']['name']);
+                        move_uploaded_file($_FILES['aadhaar_image']['tmp_name'], $aadhaar_image);
+                    } else {
+                        $aadhaar_image = 'admin/Uploads/placeholder.jpg';
                     }
-                    $aadhaar_image = $upload_dir . basename($_FILES['aadhaar_image']['name']);
-                    move_uploaded_file($_FILES['aadhaar_image']['tmp_name'], $aadhaar_image);
-                } else {
-                    $aadhaar_image = 'admin/Uploads/placeholder.jpg';
-                }
-                if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] == 0) {
-                    $upload_dir = 'admin/Uploads/';
-                    if (!is_dir($upload_dir)) {
-                        mkdir($upload_dir, 0755, true);
+                    if (isset($_FILES['profile_photo']) && $_FILES['profile_photo']['error'] == 0) {
+                        $upload_dir = 'admin/Uploads/';
+                        if (!is_dir($upload_dir)) {
+                            mkdir($upload_dir, 0755, true);
+                        }
+                        $profile_photo = $upload_dir . basename($_FILES['profile_photo']['name']);
+                        move_uploaded_file($_FILES['profile_photo']['tmp_name'], $profile_photo);
+                    } else {
+                        $profile_photo = 'admin/Uploads/placeholder.jpg';
                     }
-                    $profile_photo = $upload_dir . basename($_FILES['profile_photo']['name']);
-                    move_uploaded_file($_FILES['profile_photo']['tmp_name'], $profile_photo);
-                } else {
-                    $profile_photo = 'admin/Uploads/placeholder.jpg';
+                    $stmt = mysqli_prepare($conn, "INSERT INTO users (name, mobile_number, id_number, address, aadhaar_image, profile_photo) VALUES (?, ?, ?, ?, ?, ?)");
+                    mysqli_stmt_bind_param($stmt, "ssssss", $name, $mobile, $id_number, $address, $aadhaar_image, $profile_photo);
+                    if (mysqli_stmt_execute($stmt)) {
+                        echo '<div class="mt-4 p-2 bg-green-600 rounded">User added successfully!</div>';
+                    } else {
+                        echo '<div class="mt-4 p-2 bg-red-600 rounded">Error: ' . mysqli_error($conn) . '</div>';
+                    }
+                    mysqli_stmt_close($stmt);
                 }
-                $stmt = mysqli_prepare($conn, "INSERT INTO users (name, mobile_number, id_number, address, aadhaar_image, profile_photo) VALUES (?, ?, ?, ?, ?, ?)");
-                mysqli_stmt_bind_param($stmt, "ssssss", $name, $mobile, $id_number, $address, $aadhaar_image, $profile_photo);
-                if (mysqli_stmt_execute($stmt)) {
-                    echo '<div class="mt-4 p-2 bg-green-600 rounded">User added successfully!</div>';
-                } else {
-                    echo '<div class="mt-4 p-2 bg-red-600 rounded">Error: ' . mysqli_error($conn) . '</div>';
-                }
-                mysqli_stmt_close($stmt);
             }
             ?>
         </div>

@@ -12,7 +12,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if ($entered_id === $admin_id && $entered_pass === $admin_password) {
         $_SESSION['admin'] = $admin_id;
-        header("Location:./admin/admin.php");
+        header("Location:admin.php");
         exit();
     } else {
         $error = "Invalid Admin ID or Password!";

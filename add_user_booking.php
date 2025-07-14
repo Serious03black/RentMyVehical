@@ -1,6 +1,5 @@
 <?php
-include 'db.php'; // Database connection
-
+include 'db.php'; 
 // Fetch summary data
 $rented_vehicles_query = "SELECT COUNT(*) AS rented_count FROM renting WHERE return_time IS NULL";
 $rented_vehicles_result = mysqli_query($conn, $rented_vehicles_query);
@@ -52,7 +51,7 @@ if (isset($_POST['add_booking'])) {
     $user_id = intval($_POST['user_id']);
     $vehicle_number = mysqli_real_escape_string($conn, $_POST['vehicle_number']);
     $rent_per_day = floatval($_POST['rent_per_day']);
-    $renting_time = mysqli_real_escape_string($conn, $_POST['renting_time']);
+    $renting_time = mysqli_real_escape_string($conn, $_POST['renting_time']); // यूज़र इनपुट टाइम
 
     $result = mysqli_query($conn, "SELECT status FROM vehicles WHERE vehicle_number = '$vehicle_number'");
     if ($row = mysqli_fetch_assoc($result)) {
@@ -138,29 +137,7 @@ if (isset($_POST['add_booking'])) {
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen flex">
     <!-- Sidebar -->
-    <div id="sidebar" class="sidebar fixed top-0 left-0 h-full w-64 bg-gray-800 p-4 shadow-lg z-50 md:transform-none sidebar-hidden md:sidebar">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-xl font-bold text-indigo-400">Admin Panel</h3>
-            <button class="md:hidden text-gray-300 hover:text-white" onclick="toggleSidebar()">✕</button>
-        </div>
-        <ul class="space-y-2">
-            <li>
-                <a href="admin.php#add-vehicle-form" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">Add Vehicle</a>
-            </li>
-            <li>
-                <a href="add_user_booking.php" class="block p-2 rounded-md bg-indigo-600 text-white font-semibold">Add User</a>
-            </li>
-            <li>
-                <a href="history.php" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">History</a>
-            </li>
-            <li>
-                <a href="revenue.php" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">Revenue</a>
-            </li>
-            <li>
-                <a href="all_users.php" class="block p-2 rounded-md text-gray-300 hover:bg-indigo-500 hover:text-white">All Users</a>
-            </li>
-        </ul>
-    </div>
+    
 
     <!-- Main Content -->
     <div class="flex-1 p-6 ml-0 md:ml-64">
@@ -265,6 +242,86 @@ if (isset($_POST['add_booking'])) {
                 </div>
                 <button type="submit" name="add_booking" class="w-full btn-primary text-white font-semibold py-2 rounded-md">Add Booking</button>
             </form>
+        </div>
+        
+        <!-- Return Vehicle Form -->
+        <div id="return-vehicle-form" class="card bg-gray-800 p-6 rounded-lg shadow-lg mb-8">
+            <h3 class="text-2xl font-semibold mb-4 text-indigo-400">Return Vehicle</h3>
+            <form method="POST" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-300">User</label>
+                    <select name="return_user_id" required class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select User</option>
+                        <?php
+                        $user_result = mysqli_query($conn, "SELECT user_id, name FROM users");
+                        while ($user = mysqli_fetch_assoc($user_result)) {
+                            echo "<option value='{$user['user_id']}'>" . htmlspecialchars($user['name']) . "</option>";
+                        }
+                        mysqli_free_result($user_result);
+                        ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300">Vehicle</label>
+                    <select name="return_vehicle_number" required class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-indigo-500 focus:border-indigo-500">
+                        <option value="">Select Vehicle</option>
+                        <?php
+                        $vehicle_result = mysqli_query($conn, "SELECT v.vehicle_number, v.vehicle_name FROM vehicles v JOIN renting r ON v.vehicle_number = r.vehicle_number WHERE r.return_time IS NULL");
+                        while ($vehicle = mysqli_fetch_assoc($vehicle_result)) {
+                            echo "<option value='{$vehicle['vehicle_number']}'>" . htmlspecialchars($vehicle['vehicle_name']) . " ({$vehicle['vehicle_number']})</option>";
+                        }
+                        mysqli_free_result($vehicle_result);
+                        ?>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-300">Return Time</label>
+                    <input type="datetime-local" name="return_time" required class="w-full mt-1 p-2 bg-gray-700 border border-gray-600 rounded-md text-white focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                <button type="submit" name="return_vehicle" class="w-full btn-primary text-white font-semibold py-2 rounded-md">Return Vehicle</button>
+            </form>
+            <?php
+            if (isset($_POST['return_vehicle'])) {
+                $user_id = intval($_POST['return_user_id']);
+                $vehicle_number = mysqli_real_escape_string($conn, $_POST['return_vehicle_number']);
+                $return_time = mysqli_real_escape_string($conn, $_POST['return_time']); // यूज़र इनपुट टाइम
+                $return_time_ts = strtotime($return_time);
+                // Active booking निकालें
+                $booking_result = mysqli_query($conn, "SELECT * FROM renting WHERE user_id = $user_id AND vehicle_number = '$vehicle_number' AND return_time IS NULL");
+                if ($booking = mysqli_fetch_assoc($booking_result)) {
+                    $renting_time = strtotime($booking['renting_time']);
+                    $rent_per_day = $booking['rent_per_day'];
+                    if ($return_time_ts < $renting_time) {
+                        echo '<div class="mt-4 p-2 bg-red-600 rounded">Error: Return Time, Booking Time से पहले नहीं हो सकता!</div>';
+                        exit; // प्रोसेसिंग यहीं रुक जाएगी
+                    } else {
+                        $duration_seconds = $return_time_ts - $renting_time;
+                        $total_days = ceil($duration_seconds / 86400);
+                        $total_cost = ($rent_per_day / 86400) * $duration_seconds;
+                        $total_cost = $total_cost < 0 ? 0 : round($total_cost, 2);
+                        // हिस्ट्री में डालें
+                        $stmt = mysqli_prepare($conn, "INSERT INTO history (user_id, vehicle_number, renting_time, return_time, total_days, rent_per_day, total_cost, payment_mode) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+                        $payment_mode = 'Cash'; // आप चाहें तो फॉर्म से ले सकते हैं
+                        mysqli_stmt_bind_param($stmt, "isssidss", $user_id, $vehicle_number, $booking['renting_time'], $return_time, $total_days, $rent_per_day, $total_cost, $payment_mode);
+                        mysqli_stmt_execute($stmt);
+                        mysqli_stmt_close($stmt);
+                        // renting में return_time अपडेट करें
+                        $stmt = mysqli_prepare($conn, "UPDATE renting SET return_time = ? WHERE booking_id = ?");
+                        mysqli_stmt_bind_param($stmt, "si", $return_time, $booking['booking_id']);
+                        mysqli_stmt_execute($stmt);
+                        mysqli_stmt_close($stmt);
+                        // vehicles को फ्री करें
+                        $stmt = mysqli_prepare($conn, "UPDATE vehicles SET status = 'Free' WHERE vehicle_number = ?");
+                        mysqli_stmt_bind_param($stmt, "s", $vehicle_number);
+                        mysqli_stmt_execute($stmt);
+                        mysqli_stmt_close($stmt);
+                        echo '<div class="mt-4 p-2 bg-green-600 rounded">वाहन सफलतापूर्वक लौटाया गया! कुल बिल: ₹' . number_format($total_cost, 2) . '</div>';
+                    }
+                } else {
+                    echo '<div class="mt-4 p-2 bg-red-600 rounded">Error: Active booking नहीं मिली!</div>';
+                }
+            }
+            ?>
         </div>
     </div>
 </body>
