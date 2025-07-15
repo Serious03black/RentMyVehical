@@ -5,7 +5,6 @@ if (isset($_GET['vehicle_number'])) {
     $result = mysqli_query($conn, "SELECT image_blob FROM vehicles WHERE vehicle_number = '$vehicle_number'");
     if ($row = mysqli_fetch_assoc($result)) {
         if (!empty($row['image_blob'])) {
-            // Content-Type ऑटो डिटेक्ट करें
             $finfo = new finfo(FILEINFO_MIME_TYPE);
             $mimeType = $finfo->buffer($row['image_blob']);
             header('Content-Type: ' . $mimeType);

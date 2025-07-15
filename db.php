@@ -1,8 +1,8 @@
 <?php
-$host = "localhost";        // Database host
-$username = "root";         // Database username
-$password = "";             // Database password
-$database = "vehicalmanagment"; // Your database name
+$host = "sql307.infinityfree.com";        // Database host
+$username = "if0_39470731";         // Database username
+$password = "pAS021203";    // Database password
+$database = "if0_39470731_rentmyvehicle"; // Your database name
 
 $conn = mysqli_connect($host, $username, $password, $database);
 

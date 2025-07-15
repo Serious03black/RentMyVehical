@@ -1,88 +1,82 @@
 <?php
-include '../db.php'; // Database connection
+include 'db.php';
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Rental History - Vehicle Management</title>
+    <title>Booking History</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .table-row:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            transform: scale(1.01);
-            transition: transform 0.2s ease-in-out;
-        }
-        .card {
-            transition: transform 0.3s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-        }
-    </style>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen">
-    <div class="container mx-auto p-6 max-w-5xl">
-        <nav class="bg-gray-800 p-4 mb-8">
-            <ul class="flex gap-4 justify-center">
-                <li><a href="admin.php" class="text-indigo-400 hover:text-indigo-300">Dashboard</a></li>
-                <li><a href="add_user_booking.php" class="text-indigo-400 hover:text-indigo-300">Add User & Booking</a></li>
-                <li><a href="history.php" class="text-indigo-400 hover:text-indigo-300 font-bold">History</a></li>
-            </ul>
-        </nav>
-
-        <h2 class="text-3xl font-bold text-center mb-8 text-white">Rental History</h2>
-
-        <!-- History Table -->
-        <div class="card bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h3 class="text-2xl font-semibold mb-4 text-indigo-400">Completed Rentals</h3>
-            <div class="overflow-x-auto">
-                <table class="w-full text-left">
-                    <thead class="bg-gray-700">
-                        <tr>
-                            <th class="p-4 text-sm font-medium text-gray-300">User</th>
-                            <th class="p-4 text-sm font-medium text-gray-300">Vehicle</th>
-                            <th class="p-4 text-sm font-medium text-gray-300">Renting Time</th>
-                            <th class="p-4 text-sm font-medium text-gray-300">Return Time</th>
-                            <th class="p-4 text-sm font-medium text-gray-300">Total Days</th>
-                            <th class="p-4 text-sm font-medium text-gray-300">Rent Per Day</th>
-                            <th class="p-4 text-sm font-medium text-gray-300">Total Cost</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php
-                    $query = "SELECT h.*, u.name AS user_name, v.vehicle_name 
-                              FROM history h 
-                              JOIN users u ON h.user_id = u.user_id 
-                              JOIN vehicles v ON h.vehicle_number = v.vehicle_number 
-                              ORDER BY h.return_time DESC";
-                    $result = mysqli_query($conn, $query);
-                    if (!$result) {
-                        die("Query failed: " . mysqli_error($conn));
-                    }
-
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        echo "<tr class='table-row border-b border-gray-700'>";
-                        echo "<td class='p-4 text-gray-100'>" . htmlspecialchars($row['user_name']) . "</td>";
-                        echo "<td class='p-4 text-gray-100'>" . htmlspecialchars($row['vehicle_name']) . " (" . htmlspecialchars($row['vehicle_number']) . ")</td>";
-                        echo "<td class='p-4 text-gray-100'>" . htmlspecialchars($row['renting_time']) . "</td>";
-                        echo "<td class='p-4 text-gray-100'>" . htmlspecialchars($row['return_time']) . "</td>";
-                        echo "<td class='p-4 text-gray-100'>" . htmlspecialchars($row['total_days']) . "</td>";
-                        echo "<td class='p-4 text-gray-100'>₹" . number_format($row['rent_per_day'], 2) . "</td>";
-                        echo "<td class='p-4 text-gray-100'>₹" . number_format($row['total_cost'], 2) . "</td>";
-                        echo "</tr>";
-                    }
-                    mysqli_free_result($result);
-                    ?>
-                    </tbody>
-                </table>
-            </div>
+    <?php include 'components/navbar.php'; ?>
+    <div class="max-w-6xl mx-auto p-6">
+        <h1 class="text-3xl font-bold text-center mb-8 text-indigo-400">Booking History</h1>
+        <form method="GET" class="mb-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+            <input type="text" name="user" placeholder="User ID or Name" value="<?php echo isset($_GET['user']) ? htmlspecialchars($_GET['user']) : '' ?>" class="p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+            <input type="text" name="vehicle" placeholder="Vehicle Number" value="<?php echo isset($_GET['vehicle']) ? htmlspecialchars($_GET['vehicle']) : '' ?>" class="p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+            <input type="date" name="date" value="<?php echo isset($_GET['date']) ? htmlspecialchars($_GET['date']) : '' ?>" class="p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+            <select name="payment_mode" class="p-2 bg-gray-700 border border-gray-600 rounded-md text-white">
+                <option value="">All Payment Modes</option>
+                <option value="Online" <?php if(isset($_GET['payment_mode']) && $_GET['payment_mode']==='Online') echo 'selected'; ?>>Online</option>
+                <option value="Cash" <?php if(isset($_GET['payment_mode']) && $_GET['payment_mode']==='Cash') echo 'selected'; ?>>Cash</option>
+                <option value="Later" <?php if(isset($_GET['payment_mode']) && $_GET['payment_mode']==='Later') echo 'selected'; ?>>Later</option>
+            </select>
+            <button type="submit" class="md:col-span-4 btn-primary text-white font-semibold py-2 rounded-md">Search / Filter</button>
+        </form>
+        <div class="bg-gray-800 p-6 rounded-lg shadow mb-8">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-gray-700">
+                    <tr>
+                        <th class="p-2">User ID</th>
+                        <th class="p-2">Vehicle Number</th>
+                        <th class="p-2">Booking Time</th>
+                        <th class="p-2">Return Time</th>
+                        <th class="p-2">Total Days</th>
+                        <th class="p-2">Rent/Day</th>
+                        <th class="p-2">Total Bill</th>
+                        <th class="p-2">Payment Mode</th>
+                    </tr>
+                </thead>
+                <tbody>
+                <?php
+                // Filter logic
+                $where = [];
+                if (!empty($_GET['user'])) {
+                    $user = mysqli_real_escape_string($conn, $_GET['user']);
+                    $where[] = "(user_id LIKE '%$user%' OR user_id IN (SELECT user_id FROM users WHERE name LIKE '%$user%'))";
+                }
+                if (!empty($_GET['vehicle'])) {
+                    $vehicle = mysqli_real_escape_string($conn, $_GET['vehicle']);
+                    $where[] = "vehicle_number LIKE '%$vehicle%'";
+                }
+                if (!empty($_GET['date'])) {
+                    $date = mysqli_real_escape_string($conn, $_GET['date']);
+                    $where[] = "DATE(return_time) = '$date'";
+                }
+                if (!empty($_GET['payment_mode'])) {
+                    $pm = mysqli_real_escape_string($conn, $_GET['payment_mode']);
+                    $where[] = "payment_mode = '$pm'";
+                }
+                $where_sql = $where ? ('WHERE ' . implode(' AND ', $where)) : '';
+                $all = mysqli_query($conn, "SELECT h.*, u.name AS user_name FROM history h LEFT JOIN users u ON h.user_id = u.user_id $where_sql ORDER BY h.return_time DESC");
+                while($row = mysqli_fetch_assoc($all)) {
+                    echo '<tr class="border-b border-gray-700">';
+                    echo '<td class="p-2">'.htmlspecialchars($row['user_id']).' - '.htmlspecialchars($row['user_name']).'</td>';
+                    echo '<td class="p-2">'.htmlspecialchars($row['vehicle_number']).'</td>';
+                    echo '<td class="p-2">'.htmlspecialchars($row['renting_time']).'</td>';
+                    echo '<td class="p-2">'.htmlspecialchars($row['return_time']).'</td>';
+                    echo '<td class="p-2">'.htmlspecialchars($row['total_days']).'</td>';
+                    echo '<td class="p-2">₹'.number_format($row['rent_per_day'],2).'</td>';
+                    echo '<td class="p-2">₹'.number_format($row['total_cost'],2).'</td>';
+                    echo '<td class="p-2">'.htmlspecialchars($row['payment_mode']).'</td>';
+                    echo '</tr>';
+                }
+                ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </body>
 </html>
-<?php
-mysqli_close($conn);
-?>

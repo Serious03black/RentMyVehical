@@ -1,13 +1,10 @@
-<?php
-$current_page = basename($_SERVER['PHP_SELF']);
-?>
-<nav class="w-full bg-gray-800 p-4 shadow-lg flex items-center justify-between">
-    <div class="flex items-center space-x-8">
-        <?php if ($current_page != 'admin.php') { ?>
-            <a href="admin/admin.php" class="text-xl font-bold text-indigo-400">Home</a>
-        <?php } ?>
-        <a href="../user.php" class="text-gray-300 hover:text-indigo-400">User</a>
-        <a href="user_vehicles.php" class="text-gray-300 hover:text-indigo-400">Vehicle</a>
-        <a href="revenue.php" class="text-gray-300 hover:text-indigo-400">Revenue</a>
+<nav>
+<div id="mobile-menu" class="flex gap-10 border-10 border-white px-4 pb-4">
+      <a href="admin.php" class="block text-gray-300 hover:text-indigo-400 py-2">Home</a>
+      <a href="user.php" class="block text-gray-300 hover:text-indigo-400 py-2">Users</a>
+      <a href="vehicles.php" class="block text-gray-300 hover:text-indigo-400 py-2">Vehicle</a>
+      <a href="revenue.php" class="block text-gray-300 hover:text-indigo-400 py-2">Revenue</a>
+      <a href="history.php" class="block text-gray-300 hover:text-indigo-400 py-2">History</a>
     </div>
+    </nav>
 </nav>
